@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Scene } from './components/Scene';
 import { Sidebar } from './components/Sidebar';
 import { useCADStore } from './store/cadStore';
+import './App.css';
 
 function App() {
   const setWasmModule = useCADStore((state) => state.setWasmModule);
   const setDocumentId = useCADStore((state) => state.setDocumentId);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const loadWasm = async () => {
@@ -36,10 +38,21 @@ function App() {
   }, [setWasmModule, setDocumentId]);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', margin: 0, overflow: 'hidden' }}>
-      <Sidebar />
-      <div style={{ flex: 1 }}>
+    <div className="app-container">
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+
+      <div className="scene-container">
         <Scene />
+        <button
+          className="mobile-toggle"
+          onClick={() => setIsSidebarOpen(true)}
+          aria-label="Open Menu"
+        >
+          ☰
+        </button>
       </div>
     </div>
   );
