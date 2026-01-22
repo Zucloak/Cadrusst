@@ -14,5 +14,11 @@ export default defineConfig({
     alias: {
       '@pkg': path.resolve(__dirname, '../pkg')
     }
+  },
+  server: {
+    fs: {
+      // Allow serving files from the parent directory (pkg)
+      allow: ['..']
+    }
   }
 })

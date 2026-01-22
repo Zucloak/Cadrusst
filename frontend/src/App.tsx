@@ -11,16 +11,19 @@ function App() {
     const loadWasm = async () => {
       try {
         // Import the WASM module using alias
-        const wasm = await import('@pkg/rustycad.js');
+        const wasmModule = await import('@pkg/rustycad.js');
         
-        // Initialize
-        wasm.init();
+        // Initialize the WASM module (calls default export which loads the .wasm file)
+        await wasmModule.default();
+        
+        // Call our init function
+        wasmModule.init();
         
         // Create a document
-        const docId = wasm.create_document();
+        const docId = wasmModule.create_document();
         
         // Store in global state
-        setWasmModule(wasm);
+        setWasmModule(wasmModule);
         setDocumentId(docId);
         
         console.log('WASM module loaded successfully, document ID:', docId);
