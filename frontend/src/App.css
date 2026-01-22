@@ -1,6 +1,7 @@
 .app-container {
   display: flex;
-  height: 100vh;
+  height: 100vh; /* Fallback */
+  height: 100dvh;
   margin: 0;
   overflow: hidden;
   position: relative;
