@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build:wasm": "wasm-pack build --target web",
+    "build:wasm": "wasm-pack build --target web --out-dir web/src/wasm --out-name rustycad",
     "build:web": "cd web && npm run build",
     "build:all": "npm run build:wasm && npm run build:web",
     "dev": "npm run build:wasm && cd web && npm run dev"

@@ -1,6 +1,6 @@
 {
-  "buildCommand": "source $HOME/.cargo/env && npm run build:all",
-  "outputDirectory": "frontend/dist",
-  "devCommand": "cd frontend && npm run dev",
-  "installCommand": "chmod +x vercel-install.sh && ./vercel-install.sh"
+  "buildCommand": "chmod +x vercel-build.sh && ./vercel-build.sh",
+  "outputDirectory": "web/dist",
+  "devCommand": "cd web && npm run dev",
+  "installCommand": "echo 'Skipping default install...'"
 }

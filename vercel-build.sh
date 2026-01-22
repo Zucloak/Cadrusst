@@ -1,18 +1,30 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Starting Vercel Build..."
+# --- Configuration for Vercel ---
+# Set explicit locations for Rust to avoid $HOME mismatches
+export RUSTUP_HOME=/vercel/.rustup
+export CARGO_HOME=/vercel/.cargo
+export PATH=$CARGO_HOME/bin:$PATH
 
-# 1. Install Rust
+echo "🚀 Starting Vercel Build Script..."
+echo "Current Directory: $(pwd)"
+echo "RUSTUP_HOME: $RUSTUP_HOME"
+
+# 1. Install Rust (if not found)
 if ! command -v rustc &> /dev/null; then
     echo "📦 Installing Rust..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    source "$HOME/.cargo/env"
+    # --no-modify-path because we set PATH manually above
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
 else
     echo "✅ Rust is already installed."
 fi
 
-# 2. Install wasm-pack
+# Ensure the target is added
+echo "🎯 Adding WASM target..."
+rustup target add wasm32-unknown-unknown
+
+# 2. Install wasm-pack (if not found)
 if ! command -v wasm-pack &> /dev/null; then
     echo "📦 Installing wasm-pack..."
     curl https://rustwasm.github.io/wasm-pack/installer/init.sh | sh
@@ -22,11 +34,7 @@ fi
 
 # 3. Build Core (WASM)
 echo "🛠️ Building RustyCAD Core (WASM)..."
-# We output directly to the web source directory so Vite can find it easily
-wasm-pack build --target web --out-dir web/src/wasm --out-name rustycad --no-typescript
-# Note: --no-typescript prevents generating a .d.ts that might conflict or be in the wrong place,
-# but usually we want types. Let's keep types but maybe move them if needed.
-# Actually, let's allow types, it helps development.
+# Build directly into the web source tree
 wasm-pack build --target web --out-dir web/src/wasm --out-name rustycad
 
 # 4. Build Frontend
