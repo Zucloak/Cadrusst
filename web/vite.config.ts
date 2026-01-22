@@ -12,17 +12,19 @@ export default defineConfig({
     topLevelAwait()
   ],
   optimizeDeps: {
+    // Exclude the WASM package from optimization to avoid issues
     exclude: ['rustycad']
   },
   resolve: {
     alias: {
-      '@core': path.resolve(__dirname, '../pkg'),
+      // Alias @core to the new location in src/wasm
+      '@core': path.resolve(__dirname, './src/wasm'),
       '@': path.resolve(__dirname, './src')
     }
   },
   server: {
     fs: {
-      // Allow serving files from the parent directory (pkg)
+      // Allow serving files from the parent directory if needed (mostly safe to keep)
       allow: ['..']
     }
   }

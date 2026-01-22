@@ -14,10 +14,13 @@
     "@react-three/fiber": "^9.5.0",
     "@tailwindcss/postcss": "^4.1.18",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.28.1",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "tailwind-merge": "^3.4.0",
     "three": "^0.182.0",
+    "vaul": "^1.1.2",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0",
     "zustand": "^5.0.10"

@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+// Use ignore because the file might not exist until build time
+// @ts-ignore
 import * as wasmBindings from '@core/rustycad';
 
 interface BoxObject {
@@ -18,6 +20,7 @@ interface CADStore {
   addBox: (l: number, w: number, h: number) => void;
   updateBox: (id: number, l: number, w: number, h: number) => void;
   selectObject: (id: number | null) => void;
+  deleteObject: (id: number) => void;
 }
 
 export const useCADStore = create<CADStore>((set, get) => ({
@@ -32,7 +35,7 @@ export const useCADStore = create<CADStore>((set, get) => ({
       // @ts-ignore - Default export is the init function
       await wasmBindings.default();
 
-      // Call the Rust-side init function (panic hook, etc)
+      // Call the Rust-side init function
       wasmBindings.init();
 
       // Create a new document
@@ -65,6 +68,7 @@ export const useCADStore = create<CADStore>((set, get) => ({
 
     const success = wasm.update_box(documentId, id, l, w, h);
     if (success) {
+      // Optimistic update for UI performance (60fps target)
       set((state) => ({
         boxes: state.boxes.map((b) =>
           b.id === id ? { ...b, length: l, width: w, height: h } : b
@@ -74,4 +78,17 @@ export const useCADStore = create<CADStore>((set, get) => ({
   },
 
   selectObject: (id) => set({ selectedId: id }),
+
+  deleteObject: (id) => {
+    const { wasm, documentId } = get();
+    if (!wasm || documentId === null) return;
+
+    const success = wasm.delete_object(documentId, id);
+    if (success) {
+      set((state) => ({
+        boxes: state.boxes.filter((b) => b.id !== id),
+        selectedId: state.selectedId === id ? null : state.selectedId,
+      }));
+    }
+  }
 }));
