@@ -6,13 +6,18 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), wasm(), topLevelAwait()],
+  plugins: [
+    react(),
+    wasm(),
+    topLevelAwait()
+  ],
   optimizeDeps: {
     exclude: ['rustycad']
   },
   resolve: {
     alias: {
-      '@pkg': path.resolve(__dirname, '../pkg')
+      '@core': path.resolve(__dirname, '../pkg'),
+      '@': path.resolve(__dirname, './src')
     }
   },
   server: {

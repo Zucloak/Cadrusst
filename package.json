@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "build:wasm": "wasm-pack build --target web",
-    "build:frontend": "cd frontend && npm run build",
-    "build:all": "npm run build:wasm && npm run build:frontend",
-    "dev": "npm run build:wasm && cd frontend && npm run dev"
+    "build:web": "cd web && npm run build",
+    "build:all": "npm run build:wasm && npm run build:web",
+    "dev": "npm run build:wasm && cd web && npm run dev"
   },
   "devDependencies": {
     "wasm-pack": "^0.14.0"
