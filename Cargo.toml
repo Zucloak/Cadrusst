@@ -1,0 +1,28 @@
+[package]
+name = "rustycad"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
+[dependencies]
+glam = { version = "0.24", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+petgraph = "0.6"
+
+[dependencies.web-sys]
+version = "0.3"
+features = [
+    "console",
+]
+
+[profile.release]
+opt-level = "z"
+lto = true
