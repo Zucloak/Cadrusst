@@ -7,5 +7,8 @@
     "build:frontend": "cd frontend && npm run build",
     "build:all": "npm run build:wasm && npm run build:frontend",
     "dev": "npm run build:wasm && cd frontend && npm run dev"
+  },
+  "devDependencies": {
+    "wasm-pack": "^0.14.0"
   }
 }

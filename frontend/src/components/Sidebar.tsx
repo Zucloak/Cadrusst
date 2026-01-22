@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useCADStore } from '../store/cadStore';
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [length, setLength] = useState(2);
   const [width, setWidth] = useState(2);
   const [height, setHeight] = useState(2);
@@ -33,15 +38,11 @@ export function Sidebar() {
   };
 
   return (
-    <div style={{
-      width: '300px',
-      height: '100vh',
-      backgroundColor: '#2d2d2d',
-      color: '#ffffff',
-      padding: '20px',
-      overflowY: 'auto',
-      fontFamily: 'Arial, sans-serif'
-    }}>
+    <div className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <button className="sidebar-close" onClick={onClose}>
+        Close Menu
+      </button>
+
       <h2 style={{ marginTop: 0 }}>RustyCAD</h2>
       
       <div style={{ marginBottom: '30px' }}>
