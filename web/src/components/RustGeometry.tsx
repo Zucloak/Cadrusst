@@ -13,8 +13,8 @@ export function RustGeometry({ id }: RustGeometryProps) {
   const selectedId = useCADStore((state) => state.selectedId);
   const isSelected = id === selectedId;
 
-  // We subscribe to the box data to trigger re-renders when dimensions change
-  const boxData = useCADStore((state) => state.boxes.find((b) => b.id === id));
+  // We subscribe to the object data to trigger re-renders when dimensions change
+  const objectData = useCADStore((state) => state.objects.find((b) => b.id === id));
 
   useEffect(() => {
     if (!wasm || documentId === null || !meshRef.current) return;
@@ -57,7 +57,7 @@ export function RustGeometry({ id }: RustGeometryProps) {
 
     meshRef.current.geometry = geometry;
 
-  }, [id, documentId, wasm, boxData]);
+  }, [id, documentId, wasm, objectData]);
 
   // Re-implementation using standard r3f events + simplified custom logic for LongPress/DoubleTap
   const longPressTimer = useRef<number | null>(null);

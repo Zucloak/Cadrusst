@@ -3,7 +3,7 @@ import { useCADStore } from './store';
 import { Viewport } from './components/Viewport';
 import { MobileDrawer } from './components/MobileDrawer';
 import { ContextPill } from './components/ContextPill';
-import { Loader2, Plus, Box, Cylinder, Circle, X } from 'lucide-react';
+import { Loader2, Plus, Box, Cylinder, Circle } from 'lucide-react';
 import { GlassPanel } from './components/ui/GlassPanel';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { AnimatePresence, motion } from 'framer-motion';
