@@ -4,7 +4,7 @@ import { useCADStore } from '../store';
 import { RustGeometry } from './RustGeometry';
 
 export function Viewport() {
-  const boxes = useCADStore((state) => state.boxes);
+  const objects = useCADStore((state) => state.objects);
   const selectObject = useCADStore((state) => state.selectObject);
 
   return (
@@ -27,8 +27,8 @@ export function Viewport() {
         />
 
         <group>
-            {boxes.map((box) => (
-                <RustGeometry key={box.id} id={box.id} />
+            {objects.map((obj) => (
+                <RustGeometry key={obj.id} id={obj.id} />
             ))}
         </group>
 
