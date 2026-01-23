@@ -6,16 +6,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export function ContextPill() {
   const selectedId = useCADStore((state) => state.selectedId);
-  const boxes = useCADStore((state) => state.boxes);
-  const updateBox = useCADStore((state) => state.updateBox);
+  const objects = useCADStore((state) => state.objects);
+  const updateShape = useCADStore((state) => state.updateShape);
   const deleteObject = useCADStore((state) => state.deleteObject);
   const selectObject = useCADStore((state) => state.selectObject);
 
-  const selectedBox = boxes.find(b => b.id === selectedId);
+  const selectedObj = objects.find(o => o.id === selectedId);
 
   return (
     <AnimatePresence>
-      {selectedBox && (
+      {selectedObj && (
         <motion.div
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -27,11 +27,11 @@ export function ContextPill() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-                        <span className="text-sm font-semibold text-white">Box #{selectedBox.id}</span>
+                        <span className="text-sm font-semibold text-white">{selectedObj.type} #{selectedObj.id}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={() => deleteObject(selectedBox.id)}
+                            onClick={() => deleteObject(selectedObj.id)}
                             className="p-2 text-zinc-400 hover:text-red-400 hover:bg-white/5 rounded-full transition-colors"
                         >
                             <Trash2 className="w-4 h-4" />
@@ -46,33 +46,72 @@ export function ContextPill() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
-                    <div className="col-span-1">
-                         <Slider
-                            label="L"
-                            min="0.1" max="10" step="0.1"
-                            value={selectedBox.length}
-                            onChange={(e) => updateBox(selectedBox.id, parseFloat(e.target.value), selectedBox.width, selectedBox.height)}
-                            className="h-12"
-                        />
-                    </div>
-                    <div className="col-span-1">
-                         <Slider
-                            label="W"
-                            min="0.1" max="10" step="0.1"
-                            value={selectedBox.width}
-                            onChange={(e) => updateBox(selectedBox.id, selectedBox.length, parseFloat(e.target.value), selectedBox.height)}
-                            className="h-12"
-                        />
-                    </div>
-                    <div className="col-span-1">
-                         <Slider
-                            label="H"
-                            min="0.1" max="10" step="0.1"
-                            value={selectedBox.height}
-                            onChange={(e) => updateBox(selectedBox.id, selectedBox.length, selectedBox.width, parseFloat(e.target.value))}
-                            className="h-12"
-                        />
-                    </div>
+                    {selectedObj.type === 'Box' && (
+                        <>
+                            <div className="col-span-1">
+                                <Slider
+                                    label="L"
+                                    min="0.1" max="10" step="0.1"
+                                    value={selectedObj.length}
+                                    onChange={(e) => updateShape(selectedObj.id, parseFloat(e.target.value), selectedObj.width, selectedObj.height)}
+                                    className="h-12"
+                                />
+                            </div>
+                            <div className="col-span-1">
+                                <Slider
+                                    label="W"
+                                    min="0.1" max="10" step="0.1"
+                                    value={selectedObj.width}
+                                    onChange={(e) => updateShape(selectedObj.id, selectedObj.length, parseFloat(e.target.value), selectedObj.height)}
+                                    className="h-12"
+                                />
+                            </div>
+                            <div className="col-span-1">
+                                <Slider
+                                    label="H"
+                                    min="0.1" max="10" step="0.1"
+                                    value={selectedObj.height}
+                                    onChange={(e) => updateShape(selectedObj.id, selectedObj.length, selectedObj.width, parseFloat(e.target.value))}
+                                    className="h-12"
+                                />
+                            </div>
+                        </>
+                    )}
+
+                    {selectedObj.type === 'Cylinder' && (
+                        <>
+                             <div className="col-span-1">
+                                <Slider
+                                    label="R"
+                                    min="0.1" max="5" step="0.1"
+                                    value={selectedObj.radius}
+                                    onChange={(e) => updateShape(selectedObj.id, parseFloat(e.target.value), selectedObj.height)}
+                                    className="h-12"
+                                />
+                            </div>
+                            <div className="col-span-1">
+                                <Slider
+                                    label="H"
+                                    min="0.1" max="10" step="0.1"
+                                    value={selectedObj.height}
+                                    onChange={(e) => updateShape(selectedObj.id, selectedObj.radius, parseFloat(e.target.value))}
+                                    className="h-12"
+                                />
+                            </div>
+                        </>
+                    )}
+
+                    {selectedObj.type === 'Sphere' && (
+                         <div className="col-span-1">
+                            <Slider
+                                label="R"
+                                min="0.1" max="5" step="0.1"
+                                value={selectedObj.radius}
+                                onChange={(e) => updateShape(selectedObj.id, parseFloat(e.target.value))}
+                                className="h-12"
+                            />
+                        </div>
+                    )}
                 </div>
             </GlassPanel>
         </motion.div>
