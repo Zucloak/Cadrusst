@@ -151,6 +151,163 @@ pub fn generate_box_mesh(length: f64, width: f64, height: f64) -> Mesh {
     }
 }
 
+/// Generate a cylinder mesh with the given radius and height
+pub fn generate_cylinder_mesh(radius: f64, height: f64) -> Mesh {
+    let r = radius as f32;
+    let h = (height / 2.0) as f32;
+    let segments = 32;
+
+    let mut vertices = Vec::new();
+    let mut normals = Vec::new();
+    let mut indices = Vec::new();
+
+    // Side walls
+    for i in 0..=segments {
+        let theta = (i as f32 / segments as f32) * std::f32::consts::TAU;
+        let x = r * theta.cos();
+        let y = r * theta.sin();
+        let nx = theta.cos();
+        let ny = theta.sin();
+
+        // Top vertex
+        vertices.push(x); vertices.push(y); vertices.push(h);
+        normals.push(nx); normals.push(ny); normals.push(0.0);
+
+        // Bottom vertex
+        vertices.push(x); vertices.push(y); vertices.push(-h);
+        normals.push(nx); normals.push(ny); normals.push(0.0);
+    }
+
+    // Indices for side walls
+    for i in 0..segments {
+        let base = i * 2;
+        indices.push(base);
+        indices.push(base + 1);
+        indices.push(base + 2);
+
+        indices.push(base + 1);
+        indices.push(base + 3);
+        indices.push(base + 2);
+    }
+
+    let side_vertex_count = (segments + 1) * 2;
+
+    // Top cap
+    // Center vertex
+    let top_center_idx = side_vertex_count;
+    vertices.push(0.0); vertices.push(0.0); vertices.push(h);
+    normals.push(0.0); normals.push(0.0); normals.push(1.0);
+
+    // Rim vertices (duplicated for sharp edge normal)
+    for i in 0..=segments {
+        let theta = (i as f32 / segments as f32) * std::f32::consts::TAU;
+        let x = r * theta.cos();
+        let y = r * theta.sin();
+        vertices.push(x); vertices.push(y); vertices.push(h);
+        normals.push(0.0); normals.push(0.0); normals.push(1.0);
+    }
+
+    // Indices for top cap
+    let top_rim_start = top_center_idx + 1;
+    for i in 0..segments {
+        indices.push(top_center_idx);
+        indices.push(top_rim_start + i + 1);
+        indices.push(top_rim_start + i);
+    }
+
+    let top_vertex_count = 1 + segments + 1;
+
+    // Bottom cap
+    // Center vertex
+    let bottom_center_idx = side_vertex_count + top_vertex_count;
+    vertices.push(0.0); vertices.push(0.0); vertices.push(-h);
+    normals.push(0.0); normals.push(0.0); normals.push(-1.0);
+
+    // Rim vertices
+    for i in 0..=segments {
+        let theta = (i as f32 / segments as f32) * std::f32::consts::TAU;
+        let x = r * theta.cos();
+        let y = r * theta.sin();
+        vertices.push(x); vertices.push(y); vertices.push(-h);
+        normals.push(0.0); normals.push(0.0); normals.push(-1.0);
+    }
+
+    // Indices for bottom cap
+    let bottom_rim_start = bottom_center_idx + 1;
+    for i in 0..segments {
+        indices.push(bottom_center_idx);
+        indices.push(bottom_rim_start + i);
+        indices.push(bottom_rim_start + i + 1);
+    }
+
+    Mesh {
+        vertices,
+        normals,
+        indices,
+    }
+}
+
+/// Generate a sphere mesh with the given radius
+pub fn generate_sphere_mesh(radius: f64) -> Mesh {
+    let r = radius as f32;
+    let sector_count = 32;
+    let stack_count = 16;
+
+    let mut vertices = Vec::new();
+    let mut normals = Vec::new();
+    let mut indices = Vec::new();
+
+    for i in 0..=stack_count {
+        let stack_angle = std::f32::consts::PI / 2.0 - (i as f32 / stack_count as f32) * std::f32::consts::PI;
+        let xy = r * stack_angle.cos();
+        let z = r * stack_angle.sin();
+
+        for j in 0..=sector_count {
+            let sector_angle = (j as f32 / sector_count as f32) * std::f32::consts::TAU;
+
+            let x = xy * sector_angle.cos();
+            let y = xy * sector_angle.sin();
+
+            vertices.push(x);
+            vertices.push(y);
+            vertices.push(z);
+
+            let nx = x / r;
+            let ny = y / r;
+            let nz = z / r;
+
+            normals.push(nx);
+            normals.push(ny);
+            normals.push(nz);
+        }
+    }
+
+    for i in 0..stack_count {
+        let k1 = (i * (sector_count + 1)) as u32;
+        let k2 = k1 + sector_count + 1;
+
+        for j in 0..sector_count {
+            if i != 0 {
+                indices.push(k1 + j);
+                indices.push(k2 + j);
+                indices.push(k1 + j + 1);
+            }
+
+            if i != (stack_count - 1) {
+                indices.push(k1 + j + 1);
+                indices.push(k2 + j);
+                indices.push(k2 + j + 1);
+            }
+        }
+    }
+
+    Mesh {
+        vertices,
+        normals,
+        indices,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

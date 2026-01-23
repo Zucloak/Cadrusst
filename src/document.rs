@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use petgraph::Graph;
 use serde::{Deserialize, Serialize};
-use crate::object::{Object, ObjectType};
+use crate::object::{Object, ShapeType};
 use crate::property::Property;
 
 /// The CAD document containing all objects
@@ -24,11 +24,11 @@ impl Document {
     }
 
     /// Add a new object to the document
-    pub fn add_object(&mut self, object_type: ObjectType) -> u32 {
+    pub fn add_object(&mut self, shape_type: ShapeType) -> u32 {
         let id = self.next_id;
         self.next_id += 1;
         
-        let object = Object::new(id, object_type);
+        let object = Object::new(id, shape_type);
         self.objects.insert(id, object);
         
         id
@@ -100,7 +100,7 @@ mod tests {
     #[test]
     fn test_add_object() {
         let mut doc = Document::new();
-        let id = doc.add_object(ObjectType::Box);
+        let id = doc.add_object(ShapeType::Box { length: 1.0, width: 1.0, height: 1.0 });
         assert_eq!(id, 1);
         assert!(doc.get_object(id).is_some());
     }
@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn test_set_object_property() {
         let mut doc = Document::new();
-        let id = doc.add_object(ObjectType::Box);
+        let id = doc.add_object(ShapeType::Box { length: 1.0, width: 1.0, height: 1.0 });
         let success = doc.set_object_property(id, "Length".to_string(), Property::Float(5.0));
         assert!(success);
         assert_eq!(
@@ -120,7 +120,7 @@ mod tests {
     #[test]
     fn test_recompute() {
         let mut doc = Document::new();
-        let id = doc.add_object(ObjectType::Box);
+        let id = doc.add_object(ShapeType::Box { length: 1.0, width: 1.0, height: 1.0 });
         doc.set_object_property(id, "Length".to_string(), Property::Float(2.0));
         doc.set_object_property(id, "Width".to_string(), Property::Float(2.0));
         doc.set_object_property(id, "Height".to_string(), Property::Float(2.0));
