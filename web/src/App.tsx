@@ -2,12 +2,74 @@ import { useEffect, useState } from 'react';
 import { useCADStore } from './store';
 import { Viewport } from './components/Viewport';
 import { MobileDrawer } from './components/MobileDrawer';
-import { ContextPill } from './components/ContextPill';
 import { Loader2, Plus, Box, Cylinder, Circle } from 'lucide-react';
 import { GlassPanel } from './components/ui/GlassPanel';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { AnimatePresence, motion } from 'framer-motion';
 import './App.css';
+
+function PropertiesPanel() {
+    const selectedId = useCADStore((state) => state.selectedId);
+    const objects = useCADStore((state) => state.objects);
+    const updateShapeParams = useCADStore((state) => state.updateShapeParams);
+
+    const activeObject = objects.find(o => o.id === selectedId);
+    if (!activeObject) return null;
+
+    return (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-4">
+            <GlassPanel className="p-4 flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+                    <span className="text-sm font-semibold text-white">{activeObject.type} #{activeObject.id}</span>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                    {activeObject.type === 'Box' && (
+                        <>
+                            <div className="flex items-center gap-2 text-white text-xs">
+                                <span className="w-4">L</span>
+                                <input className="flex-1 accent-blue-500" type="range" min="0.1" max="10" step="0.1" value={(activeObject as any).length} onChange={(e) => updateShapeParams(activeObject.id, { length: parseFloat(e.target.value) })} />
+                                <span className="w-8 text-right">{(activeObject as any).length}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-white text-xs">
+                                <span className="w-4">W</span>
+                                <input className="flex-1 accent-blue-500" type="range" min="0.1" max="10" step="0.1" value={(activeObject as any).width} onChange={(e) => updateShapeParams(activeObject.id, { width: parseFloat(e.target.value) })} />
+                                <span className="w-8 text-right">{(activeObject as any).width}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-white text-xs">
+                                <span className="w-4">H</span>
+                                <input className="flex-1 accent-blue-500" type="range" min="0.1" max="10" step="0.1" value={(activeObject as any).height} onChange={(e) => updateShapeParams(activeObject.id, { height: parseFloat(e.target.value) })} />
+                                <span className="w-8 text-right">{(activeObject as any).height}</span>
+                            </div>
+                        </>
+                    )}
+                    {activeObject.type === 'Cylinder' && (
+                        <>
+                            <div className="flex items-center gap-2 text-white text-xs">
+                                <span className="w-4">R</span>
+                                <input className="flex-1 accent-blue-500" type="range" min="0.1" max="5" step="0.1" value={(activeObject as any).radius} onChange={(e) => updateShapeParams(activeObject.id, { radius: parseFloat(e.target.value) })} />
+                                <span className="w-8 text-right">{(activeObject as any).radius}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-white text-xs">
+                                <span className="w-4">H</span>
+                                <input className="flex-1 accent-blue-500" type="range" min="0.1" max="10" step="0.1" value={(activeObject as any).height} onChange={(e) => updateShapeParams(activeObject.id, { height: parseFloat(e.target.value) })} />
+                                <span className="w-8 text-right">{(activeObject as any).height}</span>
+                            </div>
+                        </>
+                    )}
+                    {activeObject.type === 'Sphere' && (
+                        <div className="flex items-center gap-2 text-white text-xs">
+                            <span className="w-4">R</span>
+                            <input className="flex-1 accent-blue-500" type="range" min="0.1" max="5" step="0.1" value={(activeObject as any).radius} onChange={(e) => updateShapeParams(activeObject.id, { radius: parseFloat(e.target.value) })} />
+                            <span className="w-8 text-right">{(activeObject as any).radius}</span>
+                        </div>
+                    )}
+                </div>
+            </GlassPanel>
+        </div>
+    );
+}
 
 function App() {
   const init = useCADStore((state) => state.init);
@@ -81,7 +143,7 @@ function App() {
 
             {/* Context Aware UI */}
             <div className="pointer-events-auto">
-                {isDesktop ? <ContextPill /> : <MobileDrawer />}
+                {isDesktop ? <PropertiesPanel /> : <MobileDrawer />}
             </div>
 
             {/* Primary Action Button (Floating FAB) & Speed Dial */}

@@ -161,83 +161,73 @@ pub fn generate_cylinder_mesh(radius: f64, height: f64) -> Mesh {
     let mut normals = Vec::new();
     let mut indices = Vec::new();
 
-    // Side walls
+    // 1. Top Cap (Normal 0,1,0)
+    let top_center_idx = 0;
+    vertices.push(0.0); vertices.push(h); vertices.push(0.0);
+    normals.push(0.0); normals.push(1.0); normals.push(0.0);
+
     for i in 0..=segments {
         let theta = (i as f32 / segments as f32) * std::f32::consts::TAU;
         let x = r * theta.cos();
-        let y = r * theta.sin();
-        let nx = theta.cos();
-        let ny = theta.sin();
-
-        // Top vertex
-        vertices.push(x); vertices.push(y); vertices.push(h);
-        normals.push(nx); normals.push(ny); normals.push(0.0);
-
-        // Bottom vertex
-        vertices.push(x); vertices.push(y); vertices.push(-h);
-        normals.push(nx); normals.push(ny); normals.push(0.0);
+        let z = r * theta.sin();
+        vertices.push(x); vertices.push(h); vertices.push(z);
+        normals.push(0.0); normals.push(1.0); normals.push(0.0);
     }
 
-    // Indices for side walls
-    for i in 0..segments {
-        let base = i * 2;
-        indices.push(base);
-        indices.push(base + 1);
-        indices.push(base + 2);
-
-        indices.push(base + 1);
-        indices.push(base + 3);
-        indices.push(base + 2);
-    }
-
-    let side_vertex_count = (segments + 1) * 2;
-
-    // Top cap
-    // Center vertex
-    let top_center_idx = side_vertex_count;
-    vertices.push(0.0); vertices.push(0.0); vertices.push(h);
-    normals.push(0.0); normals.push(0.0); normals.push(1.0);
-
-    // Rim vertices (duplicated for sharp edge normal)
-    for i in 0..=segments {
-        let theta = (i as f32 / segments as f32) * std::f32::consts::TAU;
-        let x = r * theta.cos();
-        let y = r * theta.sin();
-        vertices.push(x); vertices.push(y); vertices.push(h);
-        normals.push(0.0); normals.push(0.0); normals.push(1.0);
-    }
-
-    // Indices for top cap
-    let top_rim_start = top_center_idx + 1;
+    // Indices Top Cap: Center, Next, Current (CCW)
     for i in 0..segments {
         indices.push(top_center_idx);
-        indices.push(top_rim_start + i + 1);
-        indices.push(top_rim_start + i);
+        indices.push(top_center_idx + 1 + i + 1); // next
+        indices.push(top_center_idx + 1 + i);     // current
     }
 
-    let top_vertex_count = 1 + segments + 1;
+    // 2. Bottom Cap (Normal 0,-1,0)
+    let bottom_center_idx = (vertices.len() / 3) as u32;
+    vertices.push(0.0); vertices.push(-h); vertices.push(0.0);
+    normals.push(0.0); normals.push(-1.0); normals.push(0.0);
 
-    // Bottom cap
-    // Center vertex
-    let bottom_center_idx = side_vertex_count + top_vertex_count;
-    vertices.push(0.0); vertices.push(0.0); vertices.push(-h);
-    normals.push(0.0); normals.push(0.0); normals.push(-1.0);
-
-    // Rim vertices
     for i in 0..=segments {
         let theta = (i as f32 / segments as f32) * std::f32::consts::TAU;
         let x = r * theta.cos();
-        let y = r * theta.sin();
-        vertices.push(x); vertices.push(y); vertices.push(-h);
-        normals.push(0.0); normals.push(0.0); normals.push(-1.0);
+        let z = r * theta.sin();
+        vertices.push(x); vertices.push(-h); vertices.push(z);
+        normals.push(0.0); normals.push(-1.0); normals.push(0.0);
     }
 
-    // Indices for bottom cap
-    let bottom_rim_start = bottom_center_idx + 1;
+    // Indices Bottom Cap: Center, Current, Next (CCW relative to camera looking at bottom)
     for i in 0..segments {
         indices.push(bottom_center_idx);
-        indices.push(bottom_rim_start + i);
-        indices.push(bottom_rim_start + i + 1);
+        indices.push(bottom_center_idx + 1 + i);     // current
+        indices.push(bottom_center_idx + 1 + i + 1); // next
+    }
+
+    // 3. Sides
+    let side_start_idx = (vertices.len() / 3) as u32;
+    for i in 0..=segments {
+        let theta = (i as f32 / segments as f32) * std::f32::consts::TAU;
+        let x = r * theta.cos();
+        let z = r * theta.sin();
+        let nx = theta.cos();
+        let nz = theta.sin();
+
+        // Top rim vertex
+        vertices.push(x); vertices.push(h); vertices.push(z);
+        normals.push(nx); normals.push(0.0); normals.push(nz);
+
+        // Bottom rim vertex
+        vertices.push(x); vertices.push(-h); vertices.push(z);
+        normals.push(nx); normals.push(0.0); normals.push(nz);
+    }
+
+    for i in 0..segments {
+        let base = side_start_idx + i * 2;
+        indices.push(base);
+        indices.push(base + 3);
+        indices.push(base + 1);
+
+        indices.push(base);
+        indices.push(base + 2);
+        indices.push(base + 3);
     }
 
     Mesh {

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use glam::Vec3;
 use crate::property::Property;
 use crate::geometry::{Mesh, generate_box_mesh, generate_cylinder_mesh, generate_sphere_mesh};
 
@@ -44,6 +45,7 @@ impl Object {
                 self.mesh = Some(generate_sphere_mesh(*radius as f64));
             }
         }
+
     }
 
     /// Set a property value

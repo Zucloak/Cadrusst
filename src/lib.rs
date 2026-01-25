@@ -8,6 +8,8 @@ use wasm_bindgen::prelude::*;
 use document::Document;
 use object::ShapeType;
 use property::Property;
+use math::Placement;
+use glam::{Vec3, Quat};
 use std::sync::Mutex;
 use std::collections::HashMap;
 
@@ -64,6 +66,7 @@ pub fn add_box(doc_id: u32, length: f64, width: f64, height: f64) -> u32 {
             doc.set_object_property(obj_id, "Length".to_string(), Property::Float(length));
             doc.set_object_property(obj_id, "Width".to_string(), Property::Float(width));
             doc.set_object_property(obj_id, "Height".to_string(), Property::Float(height));
+            doc.set_object_property(obj_id, "Placement".to_string(), Property::Placement(Placement::new()));
             doc.recompute();
             return obj_id;
         }
@@ -81,6 +84,7 @@ pub fn add_cylinder(doc_id: u32, radius: f64, height: f64) -> u32 {
             let obj_id = doc.add_object(shape);
             doc.set_object_property(obj_id, "Radius".to_string(), Property::Float(radius));
             doc.set_object_property(obj_id, "Height".to_string(), Property::Float(height));
+            doc.set_object_property(obj_id, "Placement".to_string(), Property::Placement(Placement::new()));
             doc.recompute();
             return obj_id;
         }
@@ -97,11 +101,31 @@ pub fn add_sphere(doc_id: u32, radius: f64) -> u32 {
             let shape = ShapeType::Sphere { radius: radius as f32 };
             let obj_id = doc.add_object(shape);
             doc.set_object_property(obj_id, "Radius".to_string(), Property::Float(radius));
+            doc.set_object_property(obj_id, "Placement".to_string(), Property::Placement(Placement::new()));
             doc.recompute();
             return obj_id;
         }
     }
     0
+}
+
+/// Update object placement
+#[wasm_bindgen]
+pub fn update_placement(doc_id: u32, obj_id: u32, px: f64, py: f64, pz: f64, qx: f64, qy: f64, qz: f64, qw: f64) -> bool {
+    let mut docs = DOCUMENTS.lock().unwrap();
+    if let Some(docs_map) = docs.as_mut() {
+        if let Some(doc) = docs_map.get_mut(&doc_id) {
+            let position = Vec3::new(px as f32, py as f32, pz as f32);
+            let rotation = Quat::from_xyzw(qx as f32, qy as f32, qz as f32, qw as f32);
+            let placement = Placement::from_position_rotation(position, rotation);
+
+            if doc.set_object_property(obj_id, "Placement".to_string(), Property::Placement(placement)) {
+                doc.recompute();
+                return true;
+            }
+        }
+    }
+    false
 }
 
 /// Update shape parameters
