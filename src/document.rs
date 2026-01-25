@@ -34,6 +34,15 @@ impl Document {
         id
     }
 
+    /// Restore an object with a specific ID
+    pub fn restore_object(&mut self, id: u32, shape_type: ShapeType) {
+        let object = Object::new(id, shape_type);
+        self.objects.insert(id, object);
+        if id >= self.next_id {
+            self.next_id = id + 1;
+        }
+    }
+
     /// Get an object by ID
     pub fn get_object(&self, id: u32) -> Option<&Object> {
         self.objects.get(&id)
