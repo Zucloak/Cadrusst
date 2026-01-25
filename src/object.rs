@@ -46,35 +46,6 @@ impl Object {
             }
         }
 
-        // Apply placement transform if it exists
-        if let Some(prop) = self.get_property("Placement") {
-            if let Some(placement) = prop.as_placement() {
-                if let Some(mesh) = &mut self.mesh {
-                    // Transform vertices
-                    for i in 0..(mesh.vertices.len() / 3) {
-                        let x = mesh.vertices[i*3];
-                        let y = mesh.vertices[i*3+1];
-                        let z = mesh.vertices[i*3+2];
-                        let p = Vec3::new(x, y, z);
-                        let transformed = placement.transform_point(p);
-                        mesh.vertices[i*3] = transformed.x;
-                        mesh.vertices[i*3+1] = transformed.y;
-                        mesh.vertices[i*3+2] = transformed.z;
-                    }
-                    // Transform normals (rotate only)
-                    for i in 0..(mesh.normals.len() / 3) {
-                        let nx = mesh.normals[i*3];
-                        let ny = mesh.normals[i*3+1];
-                        let nz = mesh.normals[i*3+2];
-                        let n = Vec3::new(nx, ny, nz);
-                        let transformed = placement.rotation * n;
-                        mesh.normals[i*3] = transformed.x;
-                        mesh.normals[i*3+1] = transformed.y;
-                        mesh.normals[i*3+2] = transformed.z;
-                    }
-                }
-            }
-        }
     }
 
     /// Set a property value

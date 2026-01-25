@@ -13,11 +13,6 @@ function ObjectWrapper({ obj, isSelected }: { obj: any, isSelected: boolean }) {
         if (groupRef.current) {
             const { position, quaternion } = groupRef.current;
             updatePlacement(obj.id, [position.x, position.y, position.z], [quaternion.x, quaternion.y, quaternion.z, quaternion.w]);
-
-            // Reset transform to identity to prevent double transform (WASM bakes the transform)
-            groupRef.current.position.set(0, 0, 0);
-            groupRef.current.rotation.set(0, 0, 0);
-            groupRef.current.scale.set(1, 1, 1);
         }
     };
 
