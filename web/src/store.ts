@@ -8,6 +8,8 @@ export type ShapeType = 'Box' | 'Cylinder' | 'Sphere';
 export interface BaseObject {
   id: number;
   type: ShapeType;
+  position: [number, number, number];
+  rotation: [number, number, number, number];
 }
 
 export interface BoxObject extends BaseObject {
@@ -43,6 +45,8 @@ interface CADStore {
   addSphere: (r: number) => void;
 
   updateShape: (id: number, p1: number, p2?: number, p3?: number) => void;
+  updatePlacement: (id: number, position: [number, number, number], rotation: [number, number, number, number]) => void;
+  updateShapeParams: (id: number, params: Record<string, number>) => void;
 
   selectObject: (id: number | null) => void;
   deleteObject: (id: number) => void;
@@ -82,7 +86,10 @@ export const useCADStore = create<CADStore>((set, get) => ({
 
     const id = wasm.add_box(documentId, l, w, h);
     set((state) => ({
-      objects: [...state.objects, { id, type: 'Box', length: l, width: w, height: h }],
+      objects: [...state.objects, {
+        id, type: 'Box', length: l, width: w, height: h,
+        position: [0, 0, 0], rotation: [0, 0, 0, 1]
+      }],
       selectedId: id,
     }));
   },
@@ -93,7 +100,10 @@ export const useCADStore = create<CADStore>((set, get) => ({
 
     const id = wasm.add_cylinder(documentId, r, h);
     set((state) => ({
-      objects: [...state.objects, { id, type: 'Cylinder', radius: r, height: h }],
+      objects: [...state.objects, {
+        id, type: 'Cylinder', radius: r, height: h,
+        position: [0, 0, 0], rotation: [0, 0, 0, 1]
+      }],
       selectedId: id,
     }));
   },
@@ -104,7 +114,10 @@ export const useCADStore = create<CADStore>((set, get) => ({
 
     const id = wasm.add_sphere(documentId, r);
     set((state) => ({
-      objects: [...state.objects, { id, type: 'Sphere', radius: r }],
+      objects: [...state.objects, {
+        id, type: 'Sphere', radius: r,
+        position: [0, 0, 0], rotation: [0, 0, 0, 1]
+      }],
       selectedId: id,
     }));
   },
@@ -131,6 +144,45 @@ export const useCADStore = create<CADStore>((set, get) => ({
           return obj;
         }),
       }));
+    }
+  },
+
+  updatePlacement: (id, position, rotation) => {
+    const { wasm, documentId } = get();
+    if (!wasm || documentId === null) return;
+
+    // Call WASM update placement
+    wasm.update_placement(
+        documentId,
+        id,
+        position[0], position[1], position[2],
+        rotation[0], rotation[1], rotation[2], rotation[3]
+    );
+
+    set((state) => ({
+      objects: state.objects.map((obj) =>
+        obj.id === id ? { ...obj, position, rotation } : obj
+      ),
+    }));
+  },
+
+  updateShapeParams: (id, params) => {
+    const obj = get().objects.find((o) => o.id === id);
+    if (!obj) return;
+
+    // Dispatch to updateShape based on type
+    if (obj.type === 'Box') {
+        const l = 'length' in params ? params.length : (obj as BoxObject).length;
+        const w = 'width' in params ? params.width : (obj as BoxObject).width;
+        const h = 'height' in params ? params.height : (obj as BoxObject).height;
+        get().updateShape(id, l, w, h);
+    } else if (obj.type === 'Cylinder') {
+        const r = 'radius' in params ? params.radius : (obj as CylinderObject).radius;
+        const h = 'height' in params ? params.height : (obj as CylinderObject).height;
+        get().updateShape(id, r, h);
+    } else if (obj.type === 'Sphere') {
+        const r = 'radius' in params ? params.radius : (obj as SphereObject).radius;
+        get().updateShape(id, r);
     }
   },
 
