@@ -158,19 +158,19 @@ function App() {
                         >
                             <div className="flex items-center gap-2">
                                 <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Sphere</span>
-                                <button onClick={handleAddSphere} className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center hover:bg-zinc-700 shadow-lg text-white">
+                                <button aria-label="Add Sphere" onClick={handleAddSphere} className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center hover:bg-zinc-700 shadow-lg text-white">
                                     <Circle className="w-5 h-5" />
                                 </button>
                             </div>
                              <div className="flex items-center gap-2">
                                 <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Cylinder</span>
-                                <button onClick={handleAddCylinder} className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center hover:bg-zinc-700 shadow-lg text-white">
+                                <button aria-label="Add Cylinder" onClick={handleAddCylinder} className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center hover:bg-zinc-700 shadow-lg text-white">
                                     <Cylinder className="w-5 h-5" />
                                 </button>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Box</span>
-                                <button onClick={handleAddBox} className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center hover:bg-zinc-700 shadow-lg text-white">
+                                <button aria-label="Add Box" onClick={handleAddBox} className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center hover:bg-zinc-700 shadow-lg text-white">
                                     <Box className="w-5 h-5" />
                                 </button>
                             </div>
@@ -179,6 +179,7 @@ function App() {
                 </AnimatePresence>
 
                 <button
+                    aria-label="Toggle Menu"
                     onClick={toggleMenu}
                     className={`group relative flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-all duration-200 ${
                         menuOpen ? 'bg-zinc-700 rotate-45' : 'bg-blue-600 shadow-blue-900/20 hover:scale-110 active:scale-95'

@@ -109,6 +109,54 @@ pub fn add_sphere(doc_id: u32, radius: f64) -> u32 {
     0
 }
 
+/// Restore a box to the document
+#[wasm_bindgen]
+pub fn restore_box(doc_id: u32, id: u32, length: f64, width: f64, height: f64) {
+    let mut docs = DOCUMENTS.lock().unwrap();
+    if let Some(docs_map) = docs.as_mut() {
+        if let Some(doc) = docs_map.get_mut(&doc_id) {
+            let shape = ShapeType::Box { length: length as f32, width: width as f32, height: height as f32 };
+            doc.restore_object(id, shape);
+            doc.set_object_property(id, "Length".to_string(), Property::Float(length));
+            doc.set_object_property(id, "Width".to_string(), Property::Float(width));
+            doc.set_object_property(id, "Height".to_string(), Property::Float(height));
+            doc.set_object_property(id, "Placement".to_string(), Property::Placement(Placement::new()));
+            doc.recompute();
+        }
+    }
+}
+
+/// Restore a cylinder to the document
+#[wasm_bindgen]
+pub fn restore_cylinder(doc_id: u32, id: u32, radius: f64, height: f64) {
+    let mut docs = DOCUMENTS.lock().unwrap();
+    if let Some(docs_map) = docs.as_mut() {
+        if let Some(doc) = docs_map.get_mut(&doc_id) {
+            let shape = ShapeType::Cylinder { radius: radius as f32, height: height as f32 };
+            doc.restore_object(id, shape);
+            doc.set_object_property(id, "Radius".to_string(), Property::Float(radius));
+            doc.set_object_property(id, "Height".to_string(), Property::Float(height));
+            doc.set_object_property(id, "Placement".to_string(), Property::Placement(Placement::new()));
+            doc.recompute();
+        }
+    }
+}
+
+/// Restore a sphere to the document
+#[wasm_bindgen]
+pub fn restore_sphere(doc_id: u32, id: u32, radius: f64) {
+    let mut docs = DOCUMENTS.lock().unwrap();
+    if let Some(docs_map) = docs.as_mut() {
+        if let Some(doc) = docs_map.get_mut(&doc_id) {
+            let shape = ShapeType::Sphere { radius: radius as f32 };
+            doc.restore_object(id, shape);
+            doc.set_object_property(id, "Radius".to_string(), Property::Float(radius));
+            doc.set_object_property(id, "Placement".to_string(), Property::Placement(Placement::new()));
+            doc.recompute();
+        }
+    }
+}
+
 /// Update object placement
 #[wasm_bindgen]
 pub fn update_placement(doc_id: u32, obj_id: u32, px: f64, py: f64, pz: f64, qx: f64, qy: f64, qz: f64, qw: f64) -> bool {

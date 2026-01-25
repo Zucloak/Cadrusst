@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 // Use ignore because the file might not exist until build time
 // @ts-ignore
 import * as wasmBindings from '@core/rustycad';
@@ -52,35 +53,68 @@ interface CADStore {
   deleteObject: (id: number) => void;
 }
 
-export const useCADStore = create<CADStore>((set, get) => ({
-  wasm: null,
-  documentId: null,
-  selectedId: null,
-  objects: [],
+export const useCADStore = create<CADStore>()(
+  persist(
+    (set, get) => ({
+      wasm: null,
+      documentId: null,
+      selectedId: null,
+      objects: [],
 
-  init: async () => {
-    try {
-      // Initialize the WASM module
-      // @ts-ignore - Default export is the init function
-      await wasmBindings.default();
+      init: async () => {
+        try {
+          // Initialize the WASM module
+          // @ts-ignore - Default export is the init function
+          await wasmBindings.default();
 
-      // Call the Rust-side init function
-      wasmBindings.init();
+          // Call the Rust-side init function
+          wasmBindings.init();
 
-      // Create a new document
-      const docId = wasmBindings.create_document();
+          // Create a new document
+          const docId = wasmBindings.create_document();
 
-      set({
-        wasm: wasmBindings,
-        documentId: docId
-      });
-      console.log("RustyCAD Core Initialized. Document ID:", docId);
-    } catch (err) {
-      console.error("Failed to initialize RustyCAD Core:", err);
-    }
-  },
+          set({
+            wasm: wasmBindings,
+            documentId: docId,
+          });
+          console.log('RustyCAD Core Initialized. Document ID:', docId);
 
-  addBox: (l, w, h) => {
+          // Restore objects from persistence to WASM
+          const { objects } = get();
+          if (objects.length > 0) {
+            console.log(`Restoring ${objects.length} objects from persistence...`);
+            objects.forEach((obj) => {
+              if (obj.type === 'Box') {
+                const box = obj as BoxObject;
+                wasmBindings.restore_box(docId, box.id, box.length, box.width, box.height);
+              } else if (obj.type === 'Cylinder') {
+                const cyl = obj as CylinderObject;
+                wasmBindings.restore_cylinder(docId, cyl.id, cyl.radius, cyl.height);
+              } else if (obj.type === 'Sphere') {
+                const sph = obj as SphereObject;
+                wasmBindings.restore_sphere(docId, sph.id, sph.radius);
+              }
+
+              // Restore placement
+              wasmBindings.update_placement(
+                docId,
+                obj.id,
+                obj.position[0],
+                obj.position[1],
+                obj.position[2],
+                obj.rotation[0],
+                obj.rotation[1],
+                obj.rotation[2],
+                obj.rotation[3]
+              );
+            });
+          }
+        } catch (err) {
+          console.error('Failed to initialize RustyCAD Core:', err);
+        }
+      },
+
+      addBox: (l, w, h) => {
     const { wasm, documentId } = get();
     if (!wasm || documentId === null) return;
 
@@ -188,16 +222,23 @@ export const useCADStore = create<CADStore>((set, get) => ({
 
   selectObject: (id) => set({ selectedId: id }),
 
-  deleteObject: (id) => {
-    const { wasm, documentId } = get();
-    if (!wasm || documentId === null) return;
+      deleteObject: (id) => {
+        const { wasm, documentId } = get();
+        if (!wasm || documentId === null) return;
 
-    const success = wasm.delete_object(documentId, id);
-    if (success) {
-      set((state) => ({
-        objects: state.objects.filter((obj) => obj.id !== id),
-        selectedId: state.selectedId === id ? null : state.selectedId,
-      }));
+        const success = wasm.delete_object(documentId, id);
+        if (success) {
+          set((state) => ({
+            objects: state.objects.filter((obj) => obj.id !== id),
+            selectedId: state.selectedId === id ? null : state.selectedId,
+          }));
+        }
+      },
+    }),
+    {
+      name: 'rusty-cad-scene',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ objects: state.objects }),
     }
-  }
-}));
+  )
+);
