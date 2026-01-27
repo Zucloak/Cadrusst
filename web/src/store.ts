@@ -182,6 +182,7 @@ export const useCADStore = create<CADStore>()(
   },
 
   updatePlacement: (id, position, rotation) => {
+    console.log(`[Store] updatePlacement for ${id}:`, position);
     const { wasm, documentId } = get();
     if (!wasm || documentId === null) return;
 
@@ -242,3 +243,6 @@ export const useCADStore = create<CADStore>()(
     }
   )
 );
+
+// @ts-ignore
+window.useCADStore = useCADStore;

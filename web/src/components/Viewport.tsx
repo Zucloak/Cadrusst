@@ -2,42 +2,38 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment, TransformControls } from '@react-three/drei';
 import { useCADStore } from '../store';
 import { RustGeometry } from './RustGeometry';
-import { useRef } from 'react';
+import { useState } from 'react';
 import * as THREE from 'three';
 
 function ObjectWrapper({ obj, isSelected }: { obj: any, isSelected: boolean }) {
     const updatePlacement = useCADStore((state) => state.updatePlacement);
-    const groupRef = useRef<THREE.Group>(null);
+    const [group, setGroup] = useState<THREE.Group | null>(null);
 
     const handleMouseUp = () => {
-        if (groupRef.current) {
-            const { position, quaternion } = groupRef.current;
+        if (group) {
+            const { position, quaternion } = group;
             updatePlacement(obj.id, [position.x, position.y, position.z], [quaternion.x, quaternion.y, quaternion.z, quaternion.w]);
         }
     };
 
-    const content = (
-        <group
-            ref={groupRef}
-            position={obj.position || [0,0,0]}
-            quaternion={obj.rotation || [0,0,0,1]}
-        >
-            <RustGeometry id={obj.id} />
-        </group>
-    );
-
-    if (isSelected) {
-        return (
-            <TransformControls
-                mode="translate"
-                onMouseUp={handleMouseUp}
+    return (
+        <>
+            <group
+                ref={setGroup}
+                position={obj.position || [0,0,0]}
+                quaternion={obj.rotation || [0,0,0,1]}
             >
-                {content}
-            </TransformControls>
-        );
-    }
-
-    return content;
+                <RustGeometry id={obj.id} />
+            </group>
+            {isSelected && group && (
+                <TransformControls
+                    object={group}
+                    mode="translate"
+                    onMouseUp={handleMouseUp}
+                />
+            )}
+        </>
+    );
 }
 
 export function Viewport() {
